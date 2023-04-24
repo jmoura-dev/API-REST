@@ -10,15 +10,15 @@ export async function transactionsRoutes(app: FastifyInstance) {
     {
       preHandler: [checkSessionIdExists],
     },
-    async (req, res) => {
-      const { sessionId } = req.cookies
+    async (request, reply) => {
+      const { sessionId } = request.cookies
 
       const transactions = await knex('transactions').where(
         'session_id',
         sessionId,
       )
 
-      return res.send({
+      return reply.send({
         transactions,
       })
     },
@@ -29,14 +29,14 @@ export async function transactionsRoutes(app: FastifyInstance) {
     {
       preHandler: [checkSessionIdExists],
     },
-    async (req, res) => {
-      const { sessionId } = req.cookies
+    async (request, reply) => {
+      const { sessionId } = request.cookies
 
       const getTransactionParamsSchema = z.object({
         id: z.string().uuid(),
       })
 
-      const { id } = getTransactionParamsSchema.parse(req.params)
+      const { id } = getTransactionParamsSchema.parse(request.params)
 
       const transaction = await knex('transactions')
         .where({
@@ -45,7 +45,7 @@ export async function transactionsRoutes(app: FastifyInstance) {
         })
         .first()
 
-      return res.send({
+      return reply.send({
         transaction,
       })
     },
@@ -56,33 +56,35 @@ export async function transactionsRoutes(app: FastifyInstance) {
     {
       preHandler: [checkSessionIdExists],
     },
-    async (req, res) => {
-      const { sessionId } = req.cookies
+    async (request, reply) => {
+      const { sessionId } = request.cookies
 
       const summary = await knex('transactions')
         .where('session_id', sessionId)
         .sum('amount', { as: 'amount' })
         .first()
 
-      return res.send({ summary })
+      return reply.send({ summary })
     },
   )
 
-  app.post('/', async (req, res) => {
+  app.post('/', async (request, reply) => {
     const createTransactionsBodySchema = z.object({
       title: z.string(),
       amount: z.number(),
       type: z.enum(['credit', 'debit']),
     })
 
-    const { title, amount, type } = createTransactionsBodySchema.parse(req.body)
+    const { title, amount, type } = createTransactionsBodySchema.parse(
+      request.body,
+    )
 
-    let sessionId = req.cookies.sessionId
+    let sessionId = request.cookies.sessionId
 
     if (!sessionId) {
       sessionId = randomUUID()
 
-      res.cookie('sessionId', sessionId, {
+      reply.cookie('sessionId', sessionId, {
         path: '/',
         maxAge: 1000 * 60 * 60 * 24 * 7, // 7 days
       })
@@ -95,6 +97,6 @@ export async function transactionsRoutes(app: FastifyInstance) {
       session_id: sessionId,
     })
 
-    return res.status(201).send()
+    return reply.status(201).send()
   })
 }

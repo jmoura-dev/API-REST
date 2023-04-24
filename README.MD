@@ -13,4 +13,4 @@
 ### Regras Não Funcionais(RNF)
 - Será criado ao longo da aplicação;
 
-Link deploy: https://ignite-nodejs-02-api-o9q0.onrender.com
+Link deploy: https://ignite-nodejs-02-api-e4uj.onrender.com
