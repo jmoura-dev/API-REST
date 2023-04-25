@@ -2,7 +2,7 @@
 node_modules
 
 # Database
-database/*.db
+db/*.db
 
 # Environment
 .env
